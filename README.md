@@ -89,3 +89,108 @@ It is a **stablecoin-native market workflow** that solves three real frictions a
 - **settlement friction** — high-value payouts should not always be fully public
 
 ---
+
+
+## Architecture
+
+### Social Layer
+- X / Twitter conversation
+- tweet, reply, mention, or bot trigger
+- market request generation
+
+### Market Layer
+- Arc-native market factory
+- USDC-denominated prediction market
+- collateral locking
+- claim / settlement state
+
+### Entry Layer
+- Base wallet connection
+- ETH balance detection
+- Uniswap Trading API for ETH → USDC conversion
+
+### Crosschain Transfer Layer
+- Arc Bridge Kit
+- USDC transfer from Base to Arc
+
+### Resolution Layer
+- Chainlink CRE workflow
+- outcome verification
+- resolution state update
+
+### Privacy Layer
+- private payout lane for large winners
+- private treasury lane for large protocol revenue
+- privacy-preserving workflow for sensitive value flows
+
+---
+
+## Sponsor Mapping
+
+### Arc
+Arc is the native market and settlement layer.
+
+PolyPOP uses Arc for:
+- market creation
+- USDC collateral
+- onchain settlement
+- programmable stablecoin logic
+
+### Uniswap
+Uniswap is the asset entry and execution layer.
+
+PolyPOP uses Uniswap for:
+- ETH → USDC conversion
+- clean user entry into a stablecoin-settled market
+- execution and routing at the point of market entry
+
+### Chainlink
+Chainlink is the resolution and privacy layer.
+
+PolyPOP uses Chainlink for:
+- market resolution through CRE
+- workflow orchestration
+- privacy-preserving payout and treasury flows
+
+---
+
+## Key Features
+
+- social-native market creation from X
+- Arc-native USDC market settlement
+- Base ETH user entry without pre-holding USDC
+- automatic ETH → USDC conversion through Uniswap
+- Base → Arc USDC bridge flow
+- Chainlink-powered resolution
+- optional privacy lane for large winner payouts
+- optional privacy lane for protocol treasury flows
+
+---
+
+## Technical Stack
+
+### Frontend
+- Next.js
+- React
+- TypeScript
+- wallet connection UI
+
+### Smart Contracts
+- Solidity
+- Arc market factory
+- market settlement logic
+- claim / payout logic
+
+### Routing and Execution
+- Uniswap Trading API
+- swap quote + transaction building
+
+### Bridging
+- Arc Bridge Kit
+- CCTP-based USDC transfer flow
+
+### Oracle / Workflow / Privacy
+- Chainlink CRE
+- Chainlink Confidential Compute / Confidential HTTP
+
+---
