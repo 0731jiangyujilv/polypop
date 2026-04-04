@@ -1,0 +1,2 @@
+npm run build
+scp -r dist/* root@162.220.11.15:/data/arc-uni-polypop/webapp/
