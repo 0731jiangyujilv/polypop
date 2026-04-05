@@ -7,7 +7,7 @@ When users are already arguing on X, debating with friends, or seeing two clear 
 
 - Arc: liquidity hub / advanced stablecoin logic / crosschain settlement / app-kit
 - Uniswap: API routing + bootstrap liquidity demo on Base 
-- Chainlink: onchain state-changing settlement flow, ACE Engine, Compliant private token transfer
+- Chainlink: onchain state-changing settlement flow, ACE Engine, compliant private token transfer
 
 
 ## Design
