@@ -43,7 +43,7 @@
   <!-- Layer 1 -->
   <rect x="70" y="190" width="290" height="82" class="box box-blue" />
   <text x="90" y="220" class="label">X / Twitter conversation</text>
-  <text x="90" y="245" class="small">User tags @PolyPOP around an event</text>
+  <text x="90" y="245" class="small">User tags @_PolyPOP around an event</text>
 
   <rect x="70" y="305" width="290" height="92" class="box box-blue" />
   <text x="90" y="335" class="label">PolyPOP AI intent parser</text>
@@ -98,11 +98,13 @@
 
   <rect x="870" y="620" width="195" height="96" class="box box-amber" />
   <text x="890" y="650" class="label">Real counterparty</text>
-  <text x="890" y="675" class="small">User / LP enters before close</text>
+  <text x="890" y="675" class="small">User / LP enters before</text>
+  <text x="890" y="700" class="small">close</text>
 
   <rect x="1085" y="620" width="195" height="96" class="box box-amber" />
   <text x="1105" y="650" class="label">Protocol treasury</text>
-  <text x="1105" y="675" class="small">Retains exposure if no match arrives</text>
+  <text x="1105" y="675" class="small">Retains exposure if</text>
+  <text x="1105" y="700" class="small">no match arrives</text>
 
   <!-- Layer 4 -->
   <rect x="1370" y="190" width="360" height="92" class="box box-rose" />
@@ -163,6 +165,6 @@
 
   <!-- Top linear summary -->
   <rect x="110" y="880" width="1580" height="52" class="note" />
-  <text x="135" y="912" class="label">X Conversation → @PolyPOP → Uniswap Routing → Arc App-Kit → Arc Market → Chainlink Settlement → Privacy Treasury</text>
+  <text x="135" y="912" class="label">X Conversation → @_PolyPOP → Uniswap Routing → Arc App-Kit → Arc Market → Chainlink Settlement → Privacy Treasury</text>
 
 </svg>
