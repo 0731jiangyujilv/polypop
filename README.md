@@ -87,7 +87,7 @@ The Arc App-Kit provides the following features:
 
 **PolyPOP is a social-to-market stablecoin workflow: social disagreement starts on X, Uniswap powers entry routing plus bootstrap liquidity, Arc hosts the market and settlement, and Chainlink resolves and protects sensitive value flows.**
 
-
+---
 
 ## The Problem
 
@@ -107,17 +107,10 @@ People argue all the time on X about prices, headlines, outcomes, and narratives
 
 PolyPOP connects four layers into one clean flow:
 
-1. **X as the social trigger**  
-   A tweet, reply, or argument becomes the trigger for a market.
-
-2. **Arc as the market and settlement layer**  
-   The prediction market is created natively on Arc and settled in USDC.
-
-3. **Uniswap as the user entry layer**  
-   If the user only has ETH on Base, Uniswap converts ETH into USDC automatically.
-
-4. **Chainlink as the resolution and privacy layer**  
-   Chainlink CRE resolves the market, and Chainlink privacy capabilities handle large private payout or treasury flows.
+1. **X as the social trigger** — a tweet, reply, or argument becomes the trigger for a market.
+2. **Arc as the market and settlement layer** — the prediction market is created natively on Arc and settled in USDC.
+3. **Uniswap as the user entry layer** — if the user only has ETH on Base, Uniswap converts it into USDC automatically.
+4. **Chainlink as the resolution and privacy layer** — Chainlink CRE resolves the market, and Chainlink privacy capabilities handle large private payout or treasury flows.
 
 ---
 
@@ -133,7 +126,7 @@ PolyPOP turns that disagreement into an Arc-native prediction market.
 The user does not need to manually prepare USDC.
 
 ### Step 4 — Uniswap converts ETH into USDC
-PolyPOP uses the **Uniswap Trading API** to convert the user’s ETH on Base into USDC.
+PolyPOP uses the **Uniswap Trading API** to convert the user's ETH on Base into USDC.
 
 ### Step 5 — USDC is bridged to Arc
 PolyPOP uses **Arc Bridge Kit** to move USDC from Base to Arc.
@@ -145,7 +138,7 @@ The market runs and settles natively on Arc in USDC.
 A **Chainlink CRE workflow** verifies the outcome and writes the result onchain.
 
 ### Step 8 — Large flows can go private
-If a user wins a large amount, or if protocol revenue becomes large, the payout can enter a **privacy-preserving settlement lane** instead of exposing the full value flow publicly.
+If a user wins a large amount, or if protocol revenue grows, the payout enters a **privacy-preserving settlement lane** instead of exposing the full value flow publicly.
 
 ---
 
@@ -161,136 +154,31 @@ It is a **stablecoin-native market workflow** that solves three real frictions a
 
 ---
 
-
-## Architecture
-
-### Social Layer
-- X / Twitter conversation
-- tweet, reply, mention, or bot trigger
-- market request generation
-
-### Market Layer
-- Arc-native market factory
-- USDC-denominated prediction market
-- collateral locking
-- claim / settlement state
-
-### Entry Layer
-- Base wallet connection
-- ETH balance detection
-- Uniswap Trading API for ETH → USDC conversion
-
-### Crosschain Transfer Layer
-- Arc Bridge Kit
-- USDC transfer from Base to Arc
-
-### Resolution Layer
-- Chainlink CRE workflow
-- outcome verification
-- resolution state update
-
-### Privacy Layer
-- private payout lane for large winners
-- private treasury lane for large protocol revenue
-- privacy-preserving workflow for sensitive value flows
-
----
-
-
-
-## Technical Stack
-
-### Frontend
-- Next.js
-- React
-- TypeScript
-- wallet connection UI
-
-### Smart Contracts
-- Solidity
-- Arc market factory
-- market settlement logic
-- claim / payout logic
-
-### Routing and Execution
-- Uniswap Trading API
-- swap quote + transaction building
-
-### Bridging
-- Arc Bridge Kit
-- CCTP-based USDC transfer flow
-
-### Oracle / Workflow / Privacy
-- Chainlink CRE
-- Chainlink Confidential Compute / Confidential HTTP
-
----
-
 ## Uniswap Integration
 
 Uniswap is used in **two distinct ways** inside PolyPOP.
 
 ### A. Base-side asset conversion
-If a user wants to join a market but only holds **ETH on Base**, PolyPOP uses Uniswap to convert that asset into **USDC on Base** before the user enters Arc.
 
-This makes Uniswap a real part of the user entry flow rather than a cosmetic add-on.
+If a user wants to join a market but only holds **ETH on Base**, PolyPOP uses Uniswap to convert it into **USDC on Base** before the user enters Arc. This makes Uniswap a real part of the entry flow rather than a cosmetic add-on.
 
-### Uniswap API surfaces used
 PolyPOP uses Uniswap for:
 - **quote generation** for ETH → USDC
 - **approval / execution preparation**
 - **swap transaction construction and execution**
 
-In PolyPOP:
-- **Uniswap handles the swap on Base**
-- **Bridge Kit + CCTP handles the movement of USDC into Arc**
+Uniswap handles the swap on Base. Bridge Kit + CCTP handles the movement of USDC into Arc. Uniswap does **not** bridge funds into Arc.
 
-Uniswap does **not** bridge funds into Arc.
+### B. Cold-start counterparty logic
 
-### B. Extreme cold-start market logic
-PolyPOP also uses **Uniswap v4 hooks** for an extreme counterparty case during the betting window.
+PolyPOP is designed for live disagreement, which means the first user may arrive before the other side exists. **Uniswap v4 hooks** are used to handle this case by customizing the position lifecycle and counterparty logic.
 
-If a user opens a position before the betting window closes, the protocol can temporarily seed the opposite side and become the provisional counterparty.
+When a user opens a position before the betting window closes:
 
-During that open betting window:
-- other users can still enter
-- they can take the other side against the protocol-seeded position
-- the protocol only acts as temporary backstop liquidity
-
-If no real counterparty enters before the betting window closes:
-- the protocol remains the final counterparty to the initiating user
-
-This is where **Uniswap v4 hooks** is used to customize the lifecycle of the position and counterparty logic.
-
----
-
-## Cold-Start Market Logic
-
-PolyPOP is designed for live disagreement, which means the first user may arrive before the other side exists.
-
-To solve that, PolyPOP supports a protocol-assisted start:
-
-1. User A opens the initial side of the market
-2. the protocol temporarily seeds the opposite side
-3. during the betting window, real counterparties can still enter
-4. if a real counterparty arrives, the protocol-seeded position can be reduced, replaced, or swapped out
-5. if the window closes without a real counterparty, the protocol becomes the final counterparty
+1. the protocol temporarily seeds the opposite side
+2. real counterparties can still enter during the open window and take the other side
+3. if a real counterparty arrives, the protocol-seeded position is reduced, replaced, or swapped out
+4. if the window closes without a real counterparty, the protocol remains the final counterparty
 
 This makes the market usable from the very first interaction.
-
-
-## Key Features
-
-- turn live disagreement into onchain markets
-- tag-based market creation through **@_PolyPOP**
-- Arc-native USDC settlement
-- Base ETH user entry without pre-holding USDC
-- Uniswap-powered ETH → USDC swap on Base
-- Base → Arc transfer through Bridge Kit + CCTP
-- cold-start market support
-- Uniswap v4 hook-based counterparty logic
-- Chainlink-powered resolution
-- optional privacy-preserving payout lane
-- optional private treasury lane
-
 
