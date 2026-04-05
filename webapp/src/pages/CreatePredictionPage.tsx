@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { decodeEventLog, formatUnits, parseUnits } from 'viem'
 import { useAccount, useBalance, usePublicClient, useReadContract, useWriteContract } from 'wagmi'
@@ -30,8 +30,9 @@ export function CreatePredictionPage() {
   const [errorMsg, setErrorMsg] = useState('')
   const [createdMarket, setCreatedMarket] = useState<string | null>(null)
   const [outcome, setOutcome] = useState<number>(BinaryOutcome.Yes)
-  const [amount, setAmount] = useState('50')
+  const [amount, setAmount] = useState('5')
   const [durationMinutes, setDurationMinutes] = useState('1')
+  const [livePrice, setLivePrice] = useState<string | null>(null)
 
   const amountUnits = amount ? parseUnits(amount, 6) : 0n
   const durationSeconds = BigInt(Math.max(1, Number(durationMinutes) || 1) * 60)
@@ -39,13 +40,13 @@ export function CreatePredictionPage() {
   const isOnMarketChain = chainId === MARKET_CHAIN.id
   const networkLabel = getChainLabel(chainId)
 
-  const { data: question } = useReadContract({
-    address: BINARY_MARKET_FACTORY_ADDRESS,
-    abi: BINARY_MARKET_FACTORY_ABI,
-    functionName: 'DEFAULT_QUESTION',
-    chainId: MARKET_CHAIN.id,
-    query: { enabled: BINARY_MARKET_FACTORY_ADDRESS !== '0x0000000000000000000000000000000000000000' },
-  })
+  // const { data: question } = useReadContract({
+  //   address: BINARY_MARKET_FACTORY_ADDRESS,
+  //   abi: BINARY_MARKET_FACTORY_ABI,
+  //   functionName: 'DEFAULT_QUESTION',
+  //   chainId: MARKET_CHAIN.id,
+  //   query: { enabled: BINARY_MARKET_FACTORY_ADDRESS !== '0x0000000000000000000000000000000000000000' },
+  // })
 
   const { data: minDuration } = useReadContract({
     address: BINARY_MARKET_FACTORY_ADDRESS,
@@ -89,6 +90,23 @@ export function CreatePredictionPage() {
 
   const hasEnoughUsdc = arcUsdcBalance !== undefined && arcUsdcBalance >= amountUnits
   const minDurationMinutes = Number((minDuration ?? 60n) / 60n)
+
+  const BOT_API = import.meta.env.VITE_BOT_API_URL ?? 'http://localhost:3000'
+
+  useEffect(() => {
+    let active = true
+    const load = async () => {
+      try {
+        const r = await fetch(`${BOT_API}/api/crude-oil-price`)
+        if (!r.ok) return
+        const d = await r.json()
+        if (active) setLivePrice(typeof d.price === 'string' ? d.price : null)
+      } catch { /* ignore */ }
+    }
+    load()
+    const iv = setInterval(load, 120_000)
+    return () => { active = false; clearInterval(iv) }
+  }, [BOT_API])
 
   const createdMarketUrl = useMemo(() => {
     if (!createdMarket || !window?.location?.origin) return ''
@@ -169,6 +187,7 @@ export function CreatePredictionPage() {
             abi: BINARY_MARKET_FACTORY_ABI,
             data: log.data,
             topics: log.topics,
+            strict: false,
           })
           return decoded.eventName === 'MarketCreated'
         } catch {
@@ -182,6 +201,7 @@ export function CreatePredictionPage() {
         abi: BINARY_MARKET_FACTORY_ABI,
         data: creationLog.data,
         topics: creationLog.topics,
+        strict: false,
       })
       const args = decoded.args as unknown as MarketCreatedEventArgs
       const marketAddress = args.market
@@ -210,31 +230,26 @@ export function CreatePredictionPage() {
           <section className="space-y-6">
             <div>
               <p className="text-xs uppercase tracking-[0.28em] text-[var(--color-cyan)]">
-                Arc · Binary Prediction Market
+                Arc · Prediction Market
               </p>
-              <h1 className="mt-4 max-w-3xl font-[var(--font-display)] text-4xl font-semibold tracking-[-0.05em] md:text-6xl">
-                {question || 'Will it rain in Cannes tomorrow?'}
+              <h1 className="mt-4 max-w-3xl font-[var(--font-display)] text-2xl font-semibold tracking-[-0.03em] md:text-3xl">
+                {'Will crude oil price be higher in 6 hours?'}
               </h1>
-              <p className="mt-4 max-w-2xl text-sm leading-7 text-[var(--color-muted)] md:text-base">
-                All logic is onchain. Creation, participation, settlement, and claims run directly
-                against Arc contracts — settled by Chainlink CRE.
-              </p>
             </div>
 
             <div className="grid gap-4 md:grid-cols-3">
               <div className="glow-card rounded-2xl p-5">
-                <p className="text-xs uppercase tracking-[0.24em] text-[var(--color-muted)]">Settlement</p>
-                <p className="mt-3 text-lg font-semibold text-[var(--color-ink)]">Chainlink CRE</p>
+                <p className="text-xs uppercase tracking-[0.24em] text-[var(--color-muted)]">Asset</p>
+                <p className="mt-3 text-lg font-semibold text-[var(--color-ink)]">OIL/USD</p>
               </div>
               <div className="glow-card rounded-2xl p-5">
-                <p className="text-xs uppercase tracking-[0.24em] text-[var(--color-muted)]">Bet Window</p>
-                <p className="mt-3 text-lg font-semibold text-[var(--color-ink)]">10 minutes</p>
+                <p className="text-xs uppercase tracking-[0.24em] text-[var(--color-muted)]">Duration</p>
+                <p className="mt-3 text-lg font-semibold text-[var(--color-ink)]">{Number(durationMinutes) >= 60 ? `${(Number(durationMinutes) / 60).toFixed(1).replace('.0', '')}h` : `${durationMinutes}m`}</p>
               </div>
               <div className="glow-card rounded-2xl p-5">
-                <p className="text-xs uppercase tracking-[0.24em] text-[var(--color-muted)]">Min Resolve Delay</p>
-                <p className="mt-3 text-lg font-semibold text-[var(--color-ink)]">
-                  {minDurationMinutes} min
-                </p>
+                <p className="text-xs uppercase tracking-[0.24em] text-[var(--color-muted)]">Live Price</p>
+                <p className="mt-3 text-lg font-semibold text-[var(--color-ink)]">{livePrice ? `$${Number(livePrice).toLocaleString(undefined, { maximumFractionDigits: 2 })}` : 'Loading...'}</p>
+                <p className="mt-1 text-[10px] text-[var(--color-muted)]">Powered by Chainlink CRE</p>
               </div>
             </div>
 
@@ -284,7 +299,7 @@ export function CreatePredictionPage() {
                           : 'bg-white text-[var(--color-muted)] ring-1 ring-[rgba(20,20,20,0.08)]'
                       }`}
                     >
-                      YES
+                      UP
                     </button>
                     <button
                       onClick={() => setOutcome(BinaryOutcome.No)}
@@ -294,7 +309,7 @@ export function CreatePredictionPage() {
                           : 'bg-white text-[var(--color-muted)] ring-1 ring-[rgba(20,20,20,0.08)]'
                       }`}
                     >
-                      NO
+                      DOWN
                     </button>
                   </div>
 
@@ -319,20 +334,20 @@ export function CreatePredictionPage() {
 
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
-                      <span className="text-xs uppercase tracking-[0.24em] text-[var(--color-muted)]">Resolve Delay After Lock</span>
-                      <span className="rounded-xl bg-[rgba(0,0,255,0.07)] px-3 py-1 text-sm font-bold text-[var(--color-cyan)]">{durationMinutes} min</span>
+                      <span className="text-xs uppercase tracking-[0.24em] text-[var(--color-muted)]">Resolve After Lock</span>
+                      <span className="rounded-xl bg-[rgba(0,0,255,0.07)] px-3 py-1 text-sm font-bold text-[var(--color-cyan)]">{Number(durationMinutes) >= 60 ? `${(Number(durationMinutes) / 60).toFixed(1).replace('.0', '')}h` : `${durationMinutes} min`}</span>
                     </div>
                     <input
                       type="range"
                       min={minDurationMinutes || 1}
-                      max={60}
+                      max={720}
                       step={1}
                       value={durationMinutes}
                       onChange={(e) => setDurationMinutes(e.target.value)}
                       className="w-full accent-[var(--color-cyan)] cursor-pointer"
                     />
                     <div className="flex justify-between text-[10px] text-[var(--color-muted)]">
-                      <span>{minDurationMinutes || 1}m</span><span>30m</span><span>60m</span>
+                      <span>{minDurationMinutes || 1}m</span><span>6h</span><span>12h</span>
                     </div>
                   </div>
 

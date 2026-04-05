@@ -30,10 +30,11 @@ export function MarketPage() {
   const { switchChain } = useSwitchChain()
   const publicClient = usePublicClient()
   const [outcome, setOutcome] = useState<number>(BinaryOutcome.Yes)
-  const [amount, setAmount] = useState('10')
+  const [amount, setAmount] = useState('1')
   const [txStep, setTxStep] = useState<TxStep>('idle')
   const [errorMsg, setErrorMsg] = useState('')
   const [privacyMode, setPrivacyMode] = useState(false)
+  const [livePrice, setLivePrice] = useState<string | null>(null)
 
   const BOT_API = import.meta.env.VITE_BOT_API_URL ?? 'http://localhost:3000'
 
@@ -44,6 +45,21 @@ export function MarketPage() {
       .then((d: { privacyMode: boolean }) => setPrivacyMode(d.privacyMode))
       .catch(() => {})
   }, [address, BOT_API])
+
+  useEffect(() => {
+    let active = true
+    const load = async () => {
+      try {
+        const r = await fetch(`${BOT_API}/api/crude-oil-price`)
+        if (!r.ok) return
+        const d = await r.json()
+        if (active) setLivePrice(typeof d.price === 'string' ? d.price : null)
+      } catch { /* ignore */ }
+    }
+    load()
+    const iv = setInterval(load, 120_000)
+    return () => { active = false; clearInterval(iv) }
+  }, [BOT_API])
 
   const marketAddress = contractAddress as `0x${string}`
   const isOnMarketChain = chainId === MARKET_CHAIN.id
@@ -116,10 +132,10 @@ export function MarketPage() {
   const myYesPosition = yesPositions.find((p) => p.player?.toLowerCase() === address?.toLowerCase())
   const myNoPosition = noPositions.find((p) => p.player?.toLowerCase() === address?.toLowerCase())
   const myPosition = myYesPosition || myNoPosition
-  const mySideLabel = myYesPosition ? 'YES' : myNoPosition ? 'NO' : null
+  const mySideLabel = myYesPosition ? 'UP' : myNoPosition ? 'DOWN' : null
 
   const shareText = useMemo(
-    () => `Predict whether it rains in Cannes tomorrow — onchain market on Arc settled by Chainlink CRE.`,
+    () => `Predict whether WTI crude oil price rises in 6 hours — onchain market on Arc settled by Chainlink CRE.`,
     []
   )
 
@@ -204,16 +220,27 @@ export function MarketPage() {
           <section className="space-y-6">
             <div>
               <p className="text-xs uppercase tracking-[0.28em] text-[var(--color-cyan)]">
-                Arc · Binary Prediction Market
+                Arc · Prediction Market
               </p>
-              <h1 className="mt-4 max-w-3xl font-[var(--font-display)] text-4xl font-semibold tracking-[-0.05em] md:text-6xl">
-                {marketInfo?.question || 'Will it rain in Cannes tomorrow?'}
+              <h1 className="mt-4 max-w-3xl font-[var(--font-display)] text-2xl font-semibold tracking-[-0.03em] md:text-3xl">
+                {'Will crude oil price be higher in 6 hours?'}
               </h1>
-              <p className="mt-4 max-w-2xl text-sm leading-7 text-[var(--color-muted)] md:text-base">
-                Outcome: <span className="font-semibold text-[var(--color-ink)]">0 = No</span>,{' '}
-                <span className="font-semibold text-[var(--color-ink)]">1 = Yes</span>. Settlement
-                delivered by Chainlink CRE.
-              </p>
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-3">
+              {(['Asset', 'Duration', 'Live Price'] as const).map((label) => (
+                <div key={label} className="glow-card rounded-2xl p-5">
+                  <p className="text-xs uppercase tracking-[0.24em] text-[var(--color-muted)]">{label}</p>
+                  {label === 'Asset' && <p className="mt-3 text-lg font-semibold text-[var(--color-ink)]">OIL/USD</p>}
+                  {label === 'Duration' && <p className="mt-3 text-lg font-semibold text-[var(--color-ink)]">{marketInfo ? (Number(marketInfo.duration) >= 3600 ? `${(Number(marketInfo.duration) / 3600).toFixed(1).replace('.0', '')}h` : `${Math.round(Number(marketInfo.duration) / 60)}m`) : '6h'}</p>}
+                  {label === 'Live Price' && (
+                    <>
+                      <p className="mt-3 text-lg font-semibold text-[var(--color-ink)]">{livePrice ? `$${Number(livePrice).toLocaleString(undefined, { maximumFractionDigits: 2 })}` : 'Loading...'}</p>
+                      <p className="mt-1 text-[10px] text-[var(--color-muted)]">Powered by Chainlink CRE</p>
+                    </>
+                  )}
+                </div>
+              ))}
             </div>
 
             {marketInfo && (
@@ -230,14 +257,14 @@ export function MarketPage() {
                 </div>
 
                 <div className="mt-6 grid gap-4 md:grid-cols-3">
-                  <MetricCard label="YES Pool" value={`${formatUsdc(totalYes)} USDC`} />
-                  <MetricCard label="NO Pool" value={`${formatUsdc(totalNo)} USDC`} />
+                  <MetricCard label="UP Pool" value={`${formatUsdc(totalYes)} USDC`} />
+                  <MetricCard label="DOWN Pool" value={`${formatUsdc(totalNo)} USDC`} />
                   <MetricCard label="Total Pool" value={`${formatUsdc(totalPool)} USDC`} />
                 </div>
 
                 <div className="mt-6 grid gap-3 rounded-2xl border border-[rgba(20,20,20,0.08)] bg-[rgba(255,255,255,0.8)] p-4 text-sm text-[var(--color-muted)] md:grid-cols-2">
                   <div>
-                    Betting closes:{' '}
+                    Closes:{' '}
                     <span className="font-medium text-[var(--color-ink)]">
                       {marketInfo.bettingDeadline > 0n
                         ? new Date(Number(marketInfo.bettingDeadline) * 1000).toLocaleString()
@@ -253,18 +280,12 @@ export function MarketPage() {
                     </span>
                   </div>
                   <div>
-                    Resolve after:{' '}
-                    <span className="font-medium text-[var(--color-ink)]">
-                      {Number(marketInfo.duration) / 60} min
-                    </span>
-                  </div>
-                  <div>
                     Result:{' '}
                     <span className="font-medium text-[var(--color-ink)]">
                       {marketInfo.status === BinaryMarketStatus.Resolved
                         ? marketInfo.resolvedOutcome === BinaryOutcome.Yes
-                          ? '1 = Yes'
-                          : '0 = No'
+                          ? '1 = UP'
+                          : '0 = DOWN'
                         : 'Pending'}
                     </span>
                   </div>
@@ -278,8 +299,8 @@ export function MarketPage() {
                   Participants
                 </p>
                 <div className="mt-5 grid gap-4 md:grid-cols-2">
-                  <PositionList title="YES" positions={yesPositions} address={address} />
-                  <PositionList title="NO" positions={noPositions} address={address} />
+                  <PositionList title="UP" positions={yesPositions} address={address} />
+                  <PositionList title="DOWN" positions={noPositions} address={address} />
                 </div>
               </div>
             )}
@@ -310,7 +331,7 @@ export function MarketPage() {
                             : 'bg-white text-[var(--color-muted)] ring-1 ring-[rgba(20,20,20,0.08)]'
                         }`}
                       >
-                        YES
+                        UP
                       </button>
                       <button
                         onClick={() => setOutcome(BinaryOutcome.No)}
@@ -320,7 +341,7 @@ export function MarketPage() {
                             : 'bg-white text-[var(--color-muted)] ring-1 ring-[rgba(20,20,20,0.08)]'
                         }`}
                       >
-                        NO
+                        DOWN
                       </button>
                     </div>
 

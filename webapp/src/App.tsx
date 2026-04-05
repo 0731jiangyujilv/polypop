@@ -10,6 +10,7 @@ import { SharePage } from '@/pages/SharePage'
 import { CreatePredictionPage } from '@/pages/CreatePredictionPage'
 import { MarketPage } from '@/pages/MarketPage'
 import { AceClaimPage } from '@/pages/AceClaimPage'
+import { SwapPage } from '@/pages/SwapPage'
 
 const queryClient = new QueryClient()
 
@@ -27,6 +28,7 @@ function App() {
             <Route path="/create" element={<CreatePredictionPage />} />
             <Route path="/market/:contractAddress" element={<MarketPage />} />
             <Route path="/ace" element={<AceClaimPage />} />
+            <Route path="/swap" element={<SwapPage />} />
           </Routes>
         </BrowserRouter>
       </QueryClientProvider>

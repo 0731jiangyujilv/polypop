@@ -34,7 +34,7 @@ export function BetPage() {
   const [asset, setAsset] = useState<string | null>(null)
   const [livePrice, setLivePrice] = useState<string | null>(null)
   const [side, setSide] = useState<number>(searchParams.get('side') === 'down' ? Side.Down : Side.Up)
-  const [amount, setAmount] = useState('50')
+  const [amount, setAmount] = useState('5')
 
   const betAddr = contractAddress as `0x${string}`
 

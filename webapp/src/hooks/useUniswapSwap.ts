@@ -1,12 +1,17 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
 import { parseUnits, formatUnits } from 'viem'
-import { useAccount, useSendTransaction } from 'wagmi'
+import { useAccount, useSendTransaction, useSignTypedData } from 'wagmi'
 import {
-  BASE_SEPOLIA_CHAIN_ID,
+  ETH_MAINNET_CHAIN_ID,
   NATIVE_ETH,
   fetchUniswapQuote,
+  fetchSwapCalldata,
+  submitUniswapOrder,
+  type UniswapQuote,
 } from '@/lib/uniswapApi'
 import { SOURCE_USDC_ADDRESS } from '@/config/contracts'
+
+const DUTCH_ROUTINGS = new Set(['DUTCH_V2', 'DUTCH_V3', 'PRIORITY'])
 
 export type SwapStep = 'idle' | 'quoting' | 'quoted' | 'swapping' | 'done' | 'error'
 
@@ -20,15 +25,10 @@ export const SWAP_TOKENS: SwapToken[] = [
   { symbol: 'ETH', address: NATIVE_ETH, decimals: 18 },
 ]
 
-interface PendingTx {
-  to: `0x${string}`
-  data: `0x${string}`
-  value: bigint
-}
-
 export function useUniswapSwap() {
   const { address } = useAccount()
   const { sendTransactionAsync } = useSendTransaction()
+  const { signTypedDataAsync } = useSignTypedData()
 
   const [step, setStep] = useState<SwapStep>('idle')
   const [quoteOut, setQuoteOut] = useState('')
@@ -36,7 +36,7 @@ export function useUniswapSwap() {
   const [gasUSD, setGasUSD] = useState('')
   const [txHash, setTxHash] = useState<string | null>(null)
   const [errorMsg, setErrorMsg] = useState('')
-  const pendingTx = useRef<PendingTx | null>(null)
+  const pendingQuote = useRef<UniswapQuote | null>(null)
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const getQuote = useCallback(
@@ -62,23 +62,17 @@ export function useUniswapSwap() {
             amount: amountWei,
             tokenIn: token.address,
             tokenOut: SOURCE_USDC_ADDRESS,
-            tokenInChainId: BASE_SEPOLIA_CHAIN_ID,
-            tokenOutChainId: BASE_SEPOLIA_CHAIN_ID,
+            tokenInChainId: ETH_MAINNET_CHAIN_ID,
+            tokenOutChainId: ETH_MAINNET_CHAIN_ID,
             swapper: address,
           })
 
           const outRaw = result.quote.output.amount
           setQuoteOut(formatUnits(BigInt(outRaw), 6))
-          setPriceImpact(result.quote.priceImpact ?? '')
-          setGasUSD(result.quote.gasUseEstimateUSD ?? '')
+          setPriceImpact(String(result.quote.priceImpact ?? ''))
+          setGasUSD(result.quote.gasFeeUSD ?? result.quote.gasUseEstimateUSD ?? '')
 
-          const { to, data, value } = result.quote.txData
-          pendingTx.current = {
-            to: to as `0x${string}`,
-            data: data as `0x${string}`,
-            value: BigInt(value),
-          }
-
+          pendingQuote.current = result
           setStep('quoted')
         } catch (err) {
           setStep('error')
@@ -90,21 +84,51 @@ export function useUniswapSwap() {
   )
 
   const executeSwap = useCallback(async () => {
-    if (!pendingTx.current) return
+    const quoteResp = pendingQuote.current
+    if (!quoteResp) return
     try {
       setStep('swapping')
-      const hash = await sendTransactionAsync({
-        to: pendingTx.current.to,
-        data: pendingTx.current.data,
-        value: pendingTx.current.value,
-      })
-      setTxHash(hash)
+
+      let signature: `0x${string}` | undefined
+      if (quoteResp.permitData) {
+        signature = await signTypedDataAsync({
+          domain: quoteResp.permitData.domain as Parameters<typeof signTypedDataAsync>[0]['domain'],
+          types: quoteResp.permitData.types as Parameters<typeof signTypedDataAsync>[0]['types'],
+          primaryType: 'PermitSingle',
+          message: quoteResp.permitData.values as Parameters<typeof signTypedDataAsync>[0]['message'],
+        })
+      }
+
+      if (DUTCH_ROUTINGS.has(quoteResp.routing)) {
+        await submitUniswapOrder(quoteResp, signature ?? '0x')
+      } else {
+        const swapResp = await fetchSwapCalldata({
+          quote: quoteResp.quote,
+          ...(signature && quoteResp.permitData
+            ? { signature, permitData: quoteResp.permitData }
+            : {}),
+        })
+        const swap = swapResp.swap
+        const hash = await sendTransactionAsync({
+          to: swap.to as `0x${string}`,
+          data: swap.data as `0x${string}`,
+          value: BigInt(swap.value ?? '0'),
+          chainId: ETH_MAINNET_CHAIN_ID,
+          ...(swap.gasLimit ? { gas: BigInt(swap.gasLimit) } : {}),
+          ...(swap.maxFeePerGas ? { maxFeePerGas: BigInt(swap.maxFeePerGas) } : {}),
+          ...(swap.maxPriorityFeePerGas
+            ? { maxPriorityFeePerGas: BigInt(swap.maxPriorityFeePerGas) }
+            : {}),
+        })
+        setTxHash(hash)
+      }
+
       setStep('done')
     } catch (err) {
       setStep('error')
       setErrorMsg(err instanceof Error ? err.message.slice(0, 200) : 'Swap failed')
     }
-  }, [sendTransactionAsync])
+  }, [sendTransactionAsync, signTypedDataAsync])
 
   const reset = useCallback(() => {
     setStep('idle')
@@ -113,7 +137,7 @@ export function useUniswapSwap() {
     setGasUSD('')
     setTxHash(null)
     setErrorMsg('')
-    pendingTx.current = null
+    pendingQuote.current = null
   }, [])
 
   useEffect(() => {

@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { parseUnits } from 'viem'
 import { useAccount, useChainId, usePublicClient, useReadContract, useReadContracts, useSwitchChain, useWriteContract } from 'wagmi'
@@ -32,9 +32,27 @@ export function HackathonMarketPage() {
   const { switchChain } = useSwitchChain()
   const publicClient = usePublicClient()
   const [outcome, setOutcome] = useState<number>(BinaryOutcome.Yes)
-  const [amount, setAmount] = useState('50')
+  const [amount, setAmount] = useState('5')
   const [txStep, setTxStep] = useState<TxStep>('idle')
   const [errorMsg, setErrorMsg] = useState('')
+  const [livePrice, setLivePrice] = useState<string | null>(null)
+
+  const BOT_API = import.meta.env.VITE_BOT_API_URL ?? 'http://localhost:3000'
+
+  useEffect(() => {
+    let active = true
+    const load = async () => {
+      try {
+        const r = await fetch(`${BOT_API}/api/crude-oil-price`)
+        if (!r.ok) return
+        const d = await r.json()
+        if (active) setLivePrice(typeof d.price === 'string' ? d.price : null)
+      } catch { /* ignore */ }
+    }
+    load()
+    const iv = setInterval(load, 120_000)
+    return () => { active = false; clearInterval(iv) }
+  }, [BOT_API])
 
   const marketAddress = contractAddress as `0x${string}`
   const isOnMarketChain = chainId === MARKET_CHAIN.id
@@ -116,12 +134,12 @@ export function HackathonMarketPage() {
   const myYesPosition = yesPositions.find((p) => p.player?.toLowerCase() === address?.toLowerCase())
   const myNoPosition = noPositions.find((p) => p.player?.toLowerCase() === address?.toLowerCase())
   const myPosition = myYesPosition || myNoPosition
-  const mySideLabel = myYesPosition ? 'YES' : myNoPosition ? 'NO' : null
+  const mySideLabel = myYesPosition ? 'UP' : myNoPosition ? 'DOWN' : null
   const bridgeHref = getArcBridgeUrl(amount)
   const uniswapHref = getUniswapSwapUrl()
 
   const shareText = useMemo(() => {
-    return `Cannes rain market is live on Arc. Bridge USDC in, choose YES or NO, and settle through Chainlink CRE.`
+    return `WTI crude oil market is live on Arc. Bridge USDC in, choose UP or DOWN, and settle through Chainlink CRE.`
   }, [])
 
   function getErrorMessage(error: unknown) {
@@ -203,13 +221,26 @@ export function HackathonMarketPage() {
         <div className="mt-10 grid gap-8 md:grid-cols-[1.1fr_0.9fr]">
           <section className="space-y-6">
             <div>
-              <p className="text-xs uppercase tracking-[0.28em] text-[var(--color-cyan)]">Arc Binary Market</p>
-              <h1 className="mt-4 max-w-3xl font-[var(--font-display)] text-4xl font-semibold tracking-[-0.05em] md:text-6xl">
-                {marketInfo?.question || 'Will it rain in Cannes tomorrow?'}
+              <p className="text-xs uppercase tracking-[0.28em] text-[var(--color-cyan)]">Arc Prediction Market</p>
+              <h1 className="mt-4 max-w-3xl font-[var(--font-display)] text-2xl font-semibold tracking-[-0.03em] md:text-3xl">
+                {'Will crude oil price be higher in 6 hours?'}
               </h1>
-              <p className="mt-4 max-w-2xl text-sm leading-7 text-[var(--color-muted)] md:text-base">
-                Binary result only: <span className="font-semibold text-[var(--color-ink)]">0 = No</span>, <span className="font-semibold text-[var(--color-ink)]">1 = Yes</span>. Settlement is expected to come from Chainlink CRE.
-              </p>
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-3">
+              <div className="glow-card rounded-2xl p-5">
+                <p className="text-xs uppercase tracking-[0.24em] text-[var(--color-muted)]">Asset</p>
+                <p className="mt-3 text-lg font-semibold text-[var(--color-ink)]">OIL/USD</p>
+              </div>
+              <div className="glow-card rounded-2xl p-5">
+                <p className="text-xs uppercase tracking-[0.24em] text-[var(--color-muted)]">Duration</p>
+                <p className="mt-3 text-lg font-semibold text-[var(--color-ink)]">{marketInfo ? (Number(marketInfo.duration) >= 3600 ? `${(Number(marketInfo.duration) / 3600).toFixed(1).replace('.0', '')}h` : `${Math.round(Number(marketInfo.duration) / 60)}m`) : '6h'}</p>
+              </div>
+              <div className="glow-card rounded-2xl p-5">
+                <p className="text-xs uppercase tracking-[0.24em] text-[var(--color-muted)]">Live Price</p>
+                <p className="mt-3 text-lg font-semibold text-[var(--color-ink)]">{livePrice ? `$${Number(livePrice).toLocaleString(undefined, { maximumFractionDigits: 2 })}` : 'Loading...'}</p>
+                <p className="mt-1 text-[10px] text-[var(--color-muted)]">Powered by Chainlink CRE</p>
+              </div>
             </div>
 
             {marketInfo && (
@@ -226,16 +257,15 @@ export function HackathonMarketPage() {
                 </div>
 
                 <div className="mt-6 grid gap-4 md:grid-cols-3">
-                  <MetricCard label="YES Pool" value={`${formatUsdc(totalYes)} USDC`} />
-                  <MetricCard label="NO Pool" value={`${formatUsdc(totalNo)} USDC`} />
+                  <MetricCard label="UP Pool" value={`${formatUsdc(totalYes)} USDC`} />
+                  <MetricCard label="DOWN Pool" value={`${formatUsdc(totalNo)} USDC`} />
                   <MetricCard label="Total Pool" value={`${formatUsdc(totalPool)} USDC`} />
                 </div>
 
                 <div className="mt-6 grid gap-3 rounded-2xl border border-[rgba(20,20,20,0.08)] bg-[rgba(255,255,255,0.8)] p-4 text-sm text-[var(--color-muted)] md:grid-cols-2">
-                  <div>Betting closes: <span className="font-medium text-[var(--color-ink)]">{marketInfo.bettingDeadline > 0n ? new Date(Number(marketInfo.bettingDeadline) * 1000).toLocaleString() : '--'}</span></div>
+                  <div>Closes: <span className="font-medium text-[var(--color-ink)]">{marketInfo.bettingDeadline > 0n ? new Date(Number(marketInfo.bettingDeadline) * 1000).toLocaleString() : '--'}</span></div>
                   <div>Start time: <span className="font-medium text-[var(--color-ink)]">{marketInfo.startTime > 0n ? new Date(Number(marketInfo.startTime) * 1000).toLocaleString() : 'Waiting for CRE lock'}</span></div>
-                  <div>Resolve after: <span className="font-medium text-[var(--color-ink)]">{Number(marketInfo.duration) / 60} minute(s)</span></div>
-                  <div>Resolved result: <span className="font-medium text-[var(--color-ink)]">{marketInfo.status === BinaryMarketStatus.Resolved ? (marketInfo.resolvedOutcome === BinaryOutcome.Yes ? '1 = Yes' : '0 = No') : 'Pending'}</span></div>
+                  <div>Resolved result: <span className="font-medium text-[var(--color-ink)]">{marketInfo.status === BinaryMarketStatus.Resolved ? (marketInfo.resolvedOutcome === BinaryOutcome.Yes ? '1 = UP' : '0 = DOWN') : 'Pending'}</span></div>
                 </div>
               </div>
             )}
@@ -244,8 +274,8 @@ export function HackathonMarketPage() {
               <div className="glow-card rounded-[28px] p-6">
                 <p className="text-xs uppercase tracking-[0.28em] text-[var(--color-muted)]">Participants</p>
                 <div className="mt-5 grid gap-4 md:grid-cols-2">
-                  <PositionList title="YES" positions={yesPositions} address={address} />
-                  <PositionList title="NO" positions={noPositions} address={address} />
+                  <PositionList title="UP" positions={yesPositions} address={address} />
+                  <PositionList title="DOWN" positions={noPositions} address={address} />
                 </div>
               </div>
             )}
@@ -296,13 +326,13 @@ export function HackathonMarketPage() {
                       onClick={() => setOutcome(BinaryOutcome.Yes)}
                       className={`rounded-2xl px-4 py-4 text-sm font-semibold transition ${outcome === BinaryOutcome.Yes ? 'bg-[rgba(34,197,94,0.12)] text-[#15803d] ring-1 ring-[rgba(34,197,94,0.4)]' : 'bg-white text-[var(--color-muted)] ring-1 ring-[rgba(20,20,20,0.08)]'}`}
                     >
-                      YES
+                      UP
                     </button>
                     <button
                       onClick={() => setOutcome(BinaryOutcome.No)}
                       className={`rounded-2xl px-4 py-4 text-sm font-semibold transition ${outcome === BinaryOutcome.No ? 'bg-[rgba(239,68,68,0.12)] text-[#dc2626] ring-1 ring-[rgba(239,68,68,0.4)]' : 'bg-white text-[var(--color-muted)] ring-1 ring-[rgba(20,20,20,0.08)]'}`}
                     >
-                      NO
+                      DOWN
                     </button>
                   </div>
 

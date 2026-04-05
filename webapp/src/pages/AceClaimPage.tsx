@@ -4,7 +4,6 @@ import { useAccount, useChainId, useSignTypedData, useSwitchChain } from 'wagmi'
 import { formatUnits } from 'viem'
 import {
   ACE_DOMAIN,
-  ACE_TOKEN_ADDRESS,
   nowTimestamp,
   fetchAceBalances,
   fetchAceTransactions,
@@ -139,9 +138,9 @@ export function AceClaimPage() {
           { name: 'amount', type: 'uint256' }, { name: 'timestamp', type: 'uint256' },
         ]} as const,
         primaryType: 'Withdraw Tokens',
-        message: { account: address, token: ACE_TOKEN_ADDRESS, amount, timestamp: ts },
+        message: { account: address, token: '0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238', amount, timestamp: ts },
       })
-      const result = await submitAceWithdraw(address, ACE_TOKEN_ADDRESS, amount, ts, auth)
+      const result = await submitAceWithdraw(address, '0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238', amount, ts, auth)
       setWithdrawTicket(result.ticket)
     } catch (err) { setError(toErrMsg(err)) }
     finally { setLoading(false) }

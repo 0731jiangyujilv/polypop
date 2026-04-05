@@ -1,12 +1,12 @@
 import { http, createConfig } from 'wagmi'
-import { sepolia } from 'wagmi/chains'
+import { baseSepolia, sepolia } from 'wagmi/chains'
 import { injected, walletConnect } from 'wagmi/connectors'
 import { MARKET_CHAIN, SOURCE_CHAIN } from '@/config/chains'
 
 const WALLETCONNECT_PROJECT_ID = import.meta.env.VITE_WALLETCONNECT_PROJECT_ID || ''
 
 export const config = createConfig({
-  chains: [MARKET_CHAIN, SOURCE_CHAIN, sepolia],
+  chains: [MARKET_CHAIN, SOURCE_CHAIN, baseSepolia, sepolia],
   connectors: [
     injected(),
     ...(WALLETCONNECT_PROJECT_ID
@@ -16,6 +16,7 @@ export const config = createConfig({
   transports: {
     [MARKET_CHAIN.id]: http(),
     [SOURCE_CHAIN.id]: http(),
+    [baseSepolia.id]: http(),
     [sepolia.id]: http(),
   },
 })

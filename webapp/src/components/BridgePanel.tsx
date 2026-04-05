@@ -1,7 +1,8 @@
 import { useState } from 'react'
-import { useAccount, useReadContract, useSwitchChain } from 'wagmi'
-import { MARKET_CHAIN, MARKET_CHAIN_LABEL, SOURCE_CHAIN, SOURCE_CHAIN_LABEL } from '@/config/chains'
-import { ERC20_ABI, MARKET_USDC_ADDRESS, SOURCE_USDC_ADDRESS } from '@/config/contracts'
+import { useAccount, useBalance, useReadContract, useSwitchChain } from 'wagmi'
+import { formatUnits } from 'viem'
+import { MARKET_CHAIN, MARKET_CHAIN_LABEL, SOURCE_CHAIN, BRIDGE_CHAIN, BRIDGE_CHAIN_LABEL } from '@/config/chains'
+import { ERC20_ABI, MARKET_USDC_ADDRESS, BRIDGE_SOURCE_USDC_ADDRESS } from '@/config/contracts'
 import { formatUsdc } from '@/lib/utils'
 import { useBridgeUSDC } from '@/hooks/useBridgeUSDC'
 import { useUniswapSwap, SWAP_TOKENS } from '@/hooks/useUniswapSwap'
@@ -17,6 +18,9 @@ export function BridgePanel({ amount, onBridged }: BridgePanelProps) {
 
   const { step, txHash, errorMsg, bridge, reset } = useBridgeUSDC()
 
+  const { data: ethBalance } = useBalance({ address, chainId: SOURCE_CHAIN.id })  // mainnet ETH for swap
+  const maxEth = ethBalance ? parseFloat(formatUnits(ethBalance.value, ethBalance.decimals)) : 1
+
   const [bridgeAmount, setBridgeAmount] = useState(amount ?? '50')
   const [swapAmount, setSwapAmount] = useState('0.01')
   const selectedToken = SWAP_TOKENS[0]
@@ -24,15 +28,15 @@ export function BridgePanel({ amount, onBridged }: BridgePanelProps) {
   const swap = useUniswapSwap()
 
   const isOnArc = chainId === MARKET_CHAIN.id
-  const isOnSourceTestnet = chainId === SOURCE_CHAIN.id
+  const isOnBridgeChain = chainId === BRIDGE_CHAIN.id
 
-  const { data: sourceUsdcBalance } = useReadContract({
-    address: SOURCE_USDC_ADDRESS,
+  const { data: bridgeUsdcBalance } = useReadContract({
+    address: BRIDGE_SOURCE_USDC_ADDRESS,
     abi: ERC20_ABI,
     functionName: 'balanceOf',
     args: address ? [address] : undefined,
-    chainId: SOURCE_CHAIN.id,
-    query: { enabled: !!address && SOURCE_USDC_ADDRESS !== '0x0000000000000000000000000000000000000000' },
+    chainId: BRIDGE_CHAIN.id,
+    query: { enabled: !!address && BRIDGE_SOURCE_USDC_ADDRESS !== '0x0000000000000000000000000000000000000000' },
   })
 
   const { data: arcUsdcBalance, refetch: refetchArcBalance } = useReadContract({
@@ -51,7 +55,7 @@ export function BridgePanel({ amount, onBridged }: BridgePanelProps) {
 
   async function handleBridge() {
     try {
-      if (!isOnSourceTestnet) await switchChain({ chainId: SOURCE_CHAIN.id })
+      if (!isOnBridgeChain) await switchChain({ chainId: BRIDGE_CHAIN.id })
       await bridge(bridgeAmount)
       await refetchArcBalance()
       onBridged?.()
@@ -63,19 +67,20 @@ export function BridgePanel({ amount, onBridged }: BridgePanelProps) {
   function getBridgeBtnLabel(): string {
     if (step === 'processing') return 'Bridging… sign wallet prompts'
     if (step === 'error') return 'Retry Bridge'
-    return isOnSourceTestnet ? 'Bridge USDC to Arc' : `Switch to ${SOURCE_CHAIN_LABEL} to Bridge`
+    return isOnBridgeChain ? 'Bridge USDC to Arc' : `Bridge USDC to Arc`
   }
 
   return (
     <div className="rounded-[24px] border border-[rgba(0,0,255,0.14)] bg-[rgba(0,0,255,0.04)] p-5">
       <p className="text-xs uppercase tracking-[0.26em] text-[var(--color-cyan)]">Get USDC on Arc</p>
+      <p className="mt-1 text-[10px] text-[var(--color-muted)]">Step 1: Swap on Ethereum · Step 2: Bridge from Base Sepolia · Step 3: Play on Arc</p>
 
       {/* Balances */}
       <div className="mt-4 grid grid-cols-2 gap-3 rounded-2xl border border-[rgba(20,20,20,0.08)] bg-[rgba(255,255,255,0.8)] p-4 text-sm">
         <div>
-          <p className="text-xs text-[var(--color-muted)]">{SOURCE_CHAIN_LABEL} USDC</p>
+          <p className="text-xs text-[var(--color-muted)]">{BRIDGE_CHAIN_LABEL} USDC</p>
           <p className="mt-1 font-semibold text-[var(--color-ink)]">
-            {sourceUsdcBalance !== undefined ? formatUsdc(sourceUsdcBalance) : '--'}
+            {bridgeUsdcBalance !== undefined ? formatUsdc(bridgeUsdcBalance) : '--'}
           </p>
         </div>
         <div>
@@ -90,24 +95,45 @@ export function BridgePanel({ amount, onBridged }: BridgePanelProps) {
       <div className="mt-5">
         <div className="flex items-center gap-2">
           <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[rgba(0,0,255,0.08)] text-[10px] font-bold text-[var(--color-cyan)]">1</span>
-          <p className="text-sm font-medium text-[var(--color-ink)]">Swap {selectedToken.symbol} → USDC on {SOURCE_CHAIN_LABEL}</p>
+          <p className="text-sm font-medium text-[var(--color-ink)]">Swap {selectedToken.symbol} → USDC on Ethereum</p>
         </div>
 
         {swap.step !== 'done' ? (
           <div className="mt-3 rounded-2xl border border-[rgba(20,20,20,0.08)] bg-white p-4 space-y-3">
             <p className="text-[10px] uppercase tracking-[0.22em] text-[var(--color-muted)]">Powered by Uniswap Trading API</p>
-            <div className="flex gap-2 items-center">
-              <span className="rounded-xl border border-[rgba(20,20,20,0.08)] bg-[rgba(0,0,0,0.02)] px-3 py-2 text-sm font-medium text-[var(--color-ink)]">
-                {selectedToken.symbol}
-              </span>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="rounded-xl border border-[rgba(20,20,20,0.08)] bg-[rgba(0,0,0,0.02)] px-3 py-1.5 text-sm font-medium text-[var(--color-ink)]">
+                  {selectedToken.symbol}
+                </span>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-base font-semibold text-[var(--color-ink)]">{swapAmount}</span>
+                  <span className="text-sm text-[var(--color-muted)]">{selectedToken.symbol}</span>
+                  <span className="text-sm text-[var(--color-muted)]">→ USDC</span>
+                </div>
+                {ethBalance && (
+                  <button
+                    onClick={() => handleSwapAmountChange(maxEth.toFixed(4))}
+                    className="text-[10px] text-[var(--color-cyan)] hover:underline"
+                  >
+                    Max
+                  </button>
+                )}
+              </div>
               <input
+                type="range"
+                min="0.001"
+                max={maxEth > 0.001 ? maxEth.toFixed(4) : '1'}
+                step="0.001"
                 value={swapAmount}
                 onChange={(e) => handleSwapAmountChange(e.target.value)}
                 disabled={swap.step === 'swapping'}
-                placeholder="0.01"
-                className="flex-1 rounded-xl border border-[rgba(20,20,20,0.08)] bg-[rgba(0,0,0,0.02)] px-3 py-2 text-sm text-[var(--color-ink)] disabled:opacity-50"
+                className="w-full accent-[var(--color-cyan)] disabled:opacity-50"
               />
-              <span className="text-[var(--color-muted)] text-sm">→ USDC</span>
+              <div className="flex justify-between text-[10px] text-[var(--color-muted)]">
+                <span>0.001</span>
+                <span>{ethBalance ? maxEth.toFixed(4) : '--'} ETH</span>
+              </div>
             </div>
 
             {swap.step === 'quoting' && (

@@ -49,9 +49,9 @@ export function HomePage() {
             <p className="text-xs uppercase tracking-[0.28em] text-[var(--color-muted)]">How It Works</p>
             <div className="mt-6 space-y-4">
               {[
-                ['1', 'Create the market', 'Connect on Arc and seed the Cannes rain market onchain'],
+                ['1', 'Create the market', 'Connect on Arc and seed the WTI crude oil market onchain'],
                 ['2', 'Bridge from other chains', 'Swap to USDC on Uniswap, then bridge into Arc via CCTP'],
-                ['3', 'Join on Arc', 'Participants choose YES or NO and stake USDC'],
+                ['3', 'Join on Arc', 'Participants choose UP or DOWN and stake USDC'],
                 ['4', 'Resolve with CRE', 'Chainlink CRE locks and resolves the binary outcome'],
                 ['5', 'Claim payout', 'Winners claim their proportional share of the prize pool'],
               ].map(([step, title, desc]) => (

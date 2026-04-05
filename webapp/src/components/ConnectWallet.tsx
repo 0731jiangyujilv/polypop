@@ -25,7 +25,7 @@ function getConnectorLogoMeta(name: string) {
   return { label: name.charAt(0).toUpperCase() || '?', className: 'bg-[rgba(20,20,20,0.08)] text-[var(--color-ink)]' }
 }
 
-type ChainId = 5042002 | 84532 | 11155111
+type ChainId = 5042002 | 1 | 84532 | 11155111
 
 type ConnectWalletProps = {
   requiredChainId?: ChainId
