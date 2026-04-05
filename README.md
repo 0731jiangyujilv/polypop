@@ -1,7 +1,7 @@
-# polypop
+# PolyPOP
 
 PolyPOP turns live disagreement into live markets.
-When users are already arguing on X, debating with friends, or seeing two clear sides to a question, they can tag @PolyPOP to deploy an onchain prediction market directly from the conversation.
+When users are already arguing on X, debating with friends, or seeing two clear sides to a question, they can tag @_PolyPOP to deploy an onchain prediction market directly from the conversation.
 
 ## Dependencies
 
@@ -17,7 +17,7 @@ When users are already arguing on X, debating with friends, or seeing two clear 
 ## Architecture Overview
 
 ```
-X Conversation → @PolyPOP → Uniswap Routing → Arc App-Kit → Arc Market → Chainlink Settlement → Privacy Treasury
+X Conversation → @_PolyPOP → Uniswap Routing → Arc App-Kit → Arc Market → Chainlink Settlement → Privacy Treasury
 ```
 
 ## Arc App-Kit Integration
