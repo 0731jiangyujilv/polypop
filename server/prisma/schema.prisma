@@ -1,0 +1,195 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  tgId          BigInt   @id
+  walletAddress String?  @db.VarChar(42)
+  username      String?  @db.VarChar(255)
+  createdAt     DateTime @default(now())
+
+  betsCreated Bet[]      @relation("creator")
+  positions   Position[]
+
+  @@map("users")
+}
+
+enum BetStatus {
+  PROPOSED
+  OPEN
+  LOCKED
+  SETTLED
+  CANCELLED
+}
+
+model Bet {
+  id              Int       @id @default(autoincrement())
+  uuid            String    @unique @default(uuid())
+  betId           Int?      @unique
+  contractAddress String?   @db.VarChar(42)
+  creatorTgId     BigInt
+  asset           String    @db.VarChar(20)
+  minAmount       Decimal
+  maxAmount       Decimal
+  duration        Int
+  bettingDeadline DateTime?
+  status          BetStatus @default(PROPOSED)
+  messageId       BigInt?
+  chatId          BigInt
+  createdAt       DateTime  @default(now())
+  startTime       DateTime?
+  endTime         DateTime?
+  startPrice      String?   @db.VarChar(40)
+  endPrice        String?   @db.VarChar(40)
+  winningSide     String?   @db.VarChar(4)
+  isDraw          Boolean   @default(false)
+  totalUp         Decimal   @default(0)
+  totalDown       Decimal   @default(0)
+  txHash          String?   @db.VarChar(66)
+
+  creator   User       @relation("creator", fields: [creatorTgId], references: [tgId])
+  positions Position[]
+
+  @@map("bets")
+}
+
+model Position {
+  id      Int     @id @default(autoincrement())
+  betId   Int
+  tgId    BigInt
+  side    String  @db.VarChar(4) // "UP" or "DOWN"
+  amount  Decimal
+  claimed Boolean @default(false)
+
+  bet  Bet  @relation(fields: [betId], references: [id])
+  user User @relation(fields: [tgId], references: [tgId])
+
+  @@unique([betId, tgId])
+  @@map("positions")
+}
+
+enum ProposalStatus {
+  PROPOSED
+  OPEN
+  LOCKED
+  SETTLED
+  CANCELLED
+}
+
+model XUser {
+  id            Int         @id @default(autoincrement())
+  xUserId       String      @unique @db.VarChar(64)
+  username      String?     @db.VarChar(255)
+  walletAddress String?     @unique @db.VarChar(42)
+  createdAt     DateTime    @default(now())
+  proposals     XProposal[]
+
+  @@map("x_users")
+}
+
+model XProposal {
+  id                   Int            @id @default(autoincrement())
+  uuid                 String         @unique @default(uuid())
+  tweetId              String         @unique @db.VarChar(64)
+  conversationId       String?        @db.VarChar(64)
+  creatorXUserId       String         @db.VarChar(64)
+  creatorUsername      String?        @db.VarChar(255)
+  creatorWallet        String?        @db.VarChar(42)
+  asset                String         @db.VarChar(20)
+  minAmount            Decimal
+  maxAmount            Decimal
+  duration             Int
+  status               ProposalStatus @default(PROPOSED)
+  proposalReplyTweetId String?        @db.VarChar(64)
+  announcementTweetId  String?        @db.VarChar(64)
+  settlementTweetId    String?        @db.VarChar(64)
+  contractAddress      String?        @unique @db.VarChar(42)
+  onChainBetId         Int?           @unique
+  txHash               String?        @db.VarChar(66)
+  bettingDeadline      DateTime?
+  startTime            DateTime?
+  endTime              DateTime?
+  startPrice           String?        @db.VarChar(40)
+  endPrice             String?        @db.VarChar(40)
+  winningSide          String?        @db.VarChar(8)
+  isDraw               Boolean        @default(false)
+  totalUp              Decimal        @default(0)
+  totalDown            Decimal        @default(0)
+  createdAt            DateTime       @default(now())
+  updatedAt            DateTime       @updatedAt
+
+  creator XUser @relation(fields: [creatorXUserId], references: [xUserId])
+
+  @@index([status])
+  @@map("x_proposals")
+}
+
+model Cursor {
+  key       String   @id @db.VarChar(100)
+  value     String   @db.VarChar(255)
+  updatedAt DateTime @updatedAt
+
+  @@map("x_cursors")
+}
+
+model OracleRegistry {
+  asset         String   @id @db.VarChar(50)
+  oracleAddress String   @unique @db.VarChar(42)
+  decimals      Int
+  description   String   @db.VarChar(255)
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("oracle_registry")
+}
+
+model WorkerLease {
+  key       String   @id @db.VarChar(100)
+  owner     String   @db.VarChar(100)
+  expiresAt DateTime
+  updatedAt DateTime @updatedAt
+
+  @@map("worker_leases")
+}
+
+enum VerificationKind {
+  BET
+  PRICE_ORACLE
+}
+
+enum VerificationStatus {
+  PENDING
+  VERIFYING
+  VERIFIED
+  FAILED
+}
+
+model UserPrivacySettings {
+  walletAddress   String   @id @db.VarChar(42)
+  shieldedAddress String?  @db.VarChar(42)
+  privacyMode     Boolean  @default(false)
+  updatedAt       DateTime @updatedAt
+
+  @@map("user_privacy_settings")
+}
+
+model ContractVerification {
+  contractAddress String             @id @db.VarChar(42)
+  kind            VerificationKind
+  status          VerificationStatus @default(PENDING)
+  verifyAttempts  Int                @default(0)
+  txHash          String?            @db.VarChar(66)
+  lastError       String?            @db.Text
+  verifiedAt      DateTime?
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+
+  @@index([status, kind])
+  @@map("contract_verifications")
+}
