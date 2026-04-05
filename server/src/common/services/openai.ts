@@ -92,8 +92,6 @@ function parseCalendarDuration(message: string, now = new Date()): DurationHint 
   const relativePatterns: Array<{ pattern: RegExp; days: number; label: string }> = [
     { pattern: /\b(day after tomorrow)\b/i, days: 2, label: "day after tomorrow" },
     { pattern: /\b(tomorrow)\b/i, days: 1, label: "tomorrow" },
-    { pattern: /后天/, days: 2, label: "后天" },
-    { pattern: /明天/, days: 1, label: "明天" },
   ]
 
   for (const item of relativePatterns) {

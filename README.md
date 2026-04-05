@@ -42,37 +42,40 @@ The Arc App-Kit provides the following features:
 ## Main Files
 
 ### Arc App-Kit (Prediction Market / Settlement / Cross-chain)
-- `contracts/src/BinaryPredictionMarket.sol` — core prediction market contract
-- `contracts/src/BinaryPredictionMarketFactory.sol` — market factory contract
-- `contracts/src/interfaces/IBinaryPredictionMarket.sol` — market interface
-- `contracts/src/interfaces/ReceiverTemplate.sol` — cross-chain receiver template
-- `contracts/src/interfaces/IReceiver.sol` — cross-chain receiver interface
-- `server/src/common/services/settlement.ts` — settlement logic
-- `server/src/common/services/claim.ts` — claim logic
-- `server/src/common/services/bet-listener.ts` — bet event listener
-- `server/src/common/services/market-data.ts` — market data service
-- `webapp/src/lib/bridge.ts` — cross-chain bridge calls
-- `webapp/src/pages/CreatePredictionPage.tsx` / `HackathonCreatePage.tsx` — market creation pages
-- `webapp/src/pages/MarketPage.tsx` / `HackathonMarketPage.tsx` — market pages
-- `webapp/src/pages/BetPage.tsx` — betting page
+- [`contracts/src/BinaryPredictionMarket.sol`](./contracts/src/BinaryPredictionMarket.sol) — core prediction market contract
+- [`contracts/src/BinaryPredictionMarketFactory.sol`](./contracts/src/BinaryPredictionMarketFactory.sol) — market factory contract
+- [`contracts/src/interfaces/IBinaryPredictionMarket.sol`](./contracts/src/interfaces/IBinaryPredictionMarket.sol) — market interface
+- [`contracts/src/interfaces/ReceiverTemplate.sol`](./contracts/src/interfaces/ReceiverTemplate.sol) — cross-chain receiver template
+- [`contracts/src/interfaces/IReceiver.sol`](./contracts/src/interfaces/IReceiver.sol) — cross-chain receiver interface
+- [`server/src/common/services/settlement.ts`](./server/src/common/services/settlement.ts) — settlement logic
+- [`server/src/common/services/claim.ts`](./server/src/common/services/claim.ts) — claim logic
+- [`server/src/common/services/bet-listener.ts`](./server/src/common/services/bet-listener.ts) — bet event listener
+- [`server/src/common/services/market-data.ts`](./server/src/common/services/market-data.ts) — market data service
+- [`webapp/src/lib/bridge.ts`](./webapp/src/lib/bridge.ts) — cross-chain bridge calls
+- [`webapp/src/pages/CreatePredictionPage.tsx`](./webapp/src/pages/CreatePredictionPage.tsx) / [`HackathonCreatePage.tsx`](./webapp/src/pages/HackathonCreatePage.tsx) — market creation pages
+- [`webapp/src/pages/MarketPage.tsx`](./webapp/src/pages/MarketPage.tsx) / [`HackathonMarketPage.tsx`](./webapp/src/pages/HackathonMarketPage.tsx) — market pages
+- [`webapp/src/pages/BetPage.tsx`](./webapp/src/pages/BetPage.tsx) — betting page
 
 ### Uniswap (Swap / Trade Routing)
-- `webapp/src/lib/uniswap.ts` — Uniswap integration utilities
-- `webapp/src/lib/uniswapApi.ts` — Uniswap API routing wrapper
-- `webapp/src/pages/SwapPage.tsx` — swap page
+- [`webapp/src/lib/uniswap.ts`](./webapp/src/lib/uniswap.ts) — Uniswap integration utilities
+- [`webapp/src/lib/uniswapApi.ts`](./webapp/src/lib/uniswapApi.ts) — Uniswap API routing wrapper
+- [`webapp/src/pages/SwapPage.tsx`](./webapp/src/pages/SwapPage.tsx) — swap page
 
 ### Chainlink (CRE Workflow / ACE Engine / Compliant Private Transfer)
-- `cre-workflow/binary-weather/main.ts` — CRE workflow main logic
-- `cre-workflow/binary-weather/workflow.yaml` — CRE workflow config
-- `cre-workflow/project.yaml` — CRE project config
-- `server/src/ace-worker.ts` — ACE Engine worker
-- `server/src/common/aceApi.ts` — ACE API (server-side)
-- `webapp/src/lib/aceApi.ts` — ACE API (client-side)
-- `webapp/src/pages/AceClaimPage.tsx` — ACE compliant transfer claim page
-- `server/src/common/services/oracle-listener.ts` — Chainlink oracle listener
-- `contracts/src/interfaces/AggregatorV3Interface.sol` — Chainlink data feed interface
-- `contracts/src/interfaces/AutomationCompatibleInterface.sol` — Chainlink Automation interface
+- [`cre-workflow/binary-weather/main.ts`](./cre-workflow/binary-weather/main.ts) — CRE workflow main logic
+- [`cre-workflow/binary-weather/workflow.yaml`](./cre-workflow/binary-weather/workflow.yaml) — CRE workflow config
+- [`cre-workflow/project.yaml`](./cre-workflow/project.yaml) — CRE project config
+- [`server/src/ace-worker.ts`](./server/src/ace-worker.ts) — ACE Engine worker
+- [`server/src/common/aceApi.ts`](./server/src/common/aceApi.ts) — ACE API (server-side)
+- [`webapp/src/lib/aceApi.ts`](./webapp/src/lib/aceApi.ts) — ACE API (client-side)
+- [`webapp/src/pages/AceClaimPage.tsx`](./webapp/src/pages/AceClaimPage.tsx) — ACE compliant transfer claim page
+- [`server/src/common/services/oracle-listener.ts`](./server/src/common/services/oracle-listener.ts) — Chainlink oracle listener
+- [`contracts/src/interfaces/AggregatorV3Interface.sol`](./contracts/src/interfaces/AggregatorV3Interface.sol) — Chainlink data feed interface
+- [`contracts/src/interfaces/AutomationCompatibleInterface.sol`](./contracts/src/interfaces/AutomationCompatibleInterface.sol) — Chainlink Automation interface
 
+## Smart Contract Deploy
+
+- **Contract Address**: `0x65F971b490c9f5afcE465b9eEfCEFC91d25483c6` — [Arcscan](https://testnet.arcscan.app/address/0x65F971b490c9f5afcE465b9eEfCEFC91d25483c6)
 
 ## One-Line Pitch
 
