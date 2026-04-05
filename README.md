@@ -3,6 +3,12 @@
 PolyPOP turns live disagreement into live markets.
 When users are already arguing on X, debating with friends, or seeing two clear sides to a question, they can tag @_PolyPOP to deploy an onchain prediction market directly from the conversation.
 
+## Links
+
+- X / Twitter: [@_PolyPOP](https://x.com/_PolyPOP)
+- Demo: [ETHGlobal](https://ethglobal.com/showcase/polypop-qjuge)
+
+
 ## Dependencies
 
 - Arc: liquidity hub / advanced stablecoin logic / crosschain settlement / app-kit
@@ -79,12 +85,7 @@ The Arc App-Kit provides the following features:
 **PolyPOP is a social-to-market stablecoin workflow: social disagreement starts on X, Uniswap powers entry routing plus bootstrap liquidity, Arc hosts the market and settlement, and Chainlink resolves and protects sensitive value flows.**
 
 
-## Links
 
-- X / Twitter: [@_PolyPOP](https://x.com/_PolyPOP)
-- Demo: [ETHGlobal](https://ethglobal.com/showcase/polypop-qjuge)
-
-  
 
 ## The Problem
 
