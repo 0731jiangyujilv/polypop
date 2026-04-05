@@ -3,6 +3,9 @@
 PolyPOP turns live disagreement into live markets.
 When users are already arguing on X, debating with friends, or seeing two clear sides to a question, they can tag @PolyPOP to deploy an onchain prediction market directly from the conversation.
 
+
+
+
 PolyPOP is a USDC-native prediction market system with two focused demos: a real-world signal market settled in USDC using Chainlink CRE, and a cross-chain short-duration market where Arc serves as the USDC liquidity hub, Base is only the execution venue, and Uniswap powers entry routing plus bootstrap liquidity.
 
 Arc：liquidity hub / advanced stablecoin logic / crosschain settlement 
@@ -475,3 +478,71 @@ PolyPOP uses Chainlink for:
 │   └── chainlink/          # resolution and privacy integration
 ├── docs/                   # architecture, diagrams, demo notes
 └── README.md
+
+
+## PolyPOP Technical Architecture
+
+```mermaid
+flowchart TD
+    A["X / Twitter Conversation<br/>Users are already in a disagreement"] --> B["User tags @_PolyPOP"]
+    B --> C["PolyPOP App / Orchestrator<br/>Parse intent, create market request, manage user flow"]
+
+    subgraph BASE["Base Execution Layer"]
+        D["User Wallet on Base<br/>Holds ETH, not Arc USDC"]
+        E["Uniswap Trading API<br/>Quote + execution prep + swap construction"]
+        F["Base Swap Execution<br/>ETH -> USDC on Base"]
+        G["Uniswap v4 Hook Cold-Start Logic<br/>Protocol temporarily seeds opposite side"]
+        H{"Real counterparty arrives<br/>before betting window closes?"}
+        I["Real counterparty takes the opposite side"]
+        J["Protocol remains final counterparty"]
+    end
+
+    subgraph BRIDGE["Crosschain Transfer Layer"]
+        K["Bridge Kit + CCTP<br/>Move USDC from Base to Arc"]
+    end
+
+    subgraph ARC["Arc-Native Market Layer"]
+        L["Arc Market Factory / Market Contract<br/>Create market, lock collateral, track market state"]
+        M["Arc USDC Settlement State<br/>Positions, collateral, claimability"]
+        N["User joins the Arc-native market"]
+        O["Market closes / resolution pending"]
+        P["Standard public claim path"]
+    end
+
+    subgraph CHAINLINK["Chainlink Resolution + Privacy Layer"]
+        Q["Chainlink CRE Workflow<br/>Trigger -> verify outcome -> write result onchain"]
+        R["External data / API / signal source"]
+        S["Write verified result back to Arc"]
+        T{"Large winner payout or<br/>large protocol revenue?"}
+        U["Private Claim Lane<br/>Privacy-preserving winner payout"]
+        V["Private Treasury Lane<br/>Protected protocol revenue flow"]
+    end
+
+    C --> L
+
+    D --> E
+    E --> F
+    F --> K
+    K --> N
+
+    L --> M
+    N --> M
+    M --> O
+
+    C --> G
+    G --> H
+    H -->|Yes| I
+    H -->|No| J
+    I --> M
+    J --> M
+
+    O --> Q
+    Q --> R
+    R --> Q
+    Q --> S
+    S --> M
+
+    M --> T
+    T -->|No| P
+    T -->|Large user payout| U
+    T -->|Large protocol revenue| V
