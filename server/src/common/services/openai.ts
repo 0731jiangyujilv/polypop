@@ -19,21 +19,21 @@ Normalize assets to the format SYMBOL/USD when clear.
 Support any valid CoinGecko symbol (not only major coins), for example BTC/USD, ETH/USD, LINK/USD, SOL/USD, VIRTUAL/USD.
 Duration range: 10 minutes to 365 days
 The user may write in English or Chinese.
-Users may express duration as a relative unit ("5m", "1h"), a calendar day ("3.21", "03/21", "2026-03-21"), or natural language ("tomorrow", "明天", "后天").
+Users may express duration as a relative unit ("5m", "1h"), a calendar day ("3.21", "03/21", "2026-03-21"), or natural language ("tomorrow", "day after tomorrow").
 If the user provides a calendar day or natural-language date without a clock time, interpret it as the same local time-of-day as now.
 The user message will include a reference current time. Use that reference time when interpreting target-date phrases such as "tomorrow" or "3.21".
 
 Return a JSON object with these fields:
 - asset: normalized trading pair like "BTC/USD", or null if unclear
-- duration: duration in seconds, or null. Parse "10m"=600, "1h"=3600, "1d"=86400, "10分钟"=600, "1小时"=3600
+- duration: duration in seconds, or null. Parse "10m"=600, "1h"=3600, "1d"=86400, "10 minutes"=600, "1 hour"=3600
 - durationText: human readable duration like "5 minutes", or null
 - confidence: 0.0 to 1.0 how confident you are in the parse
 - error: a brief error message if something is unclear, or null
 - If the user's intention to start a game or make predictions is unclear, return false directly.
 
 Examples:
-- "BTC 10分钟" → {"asset":"BTC/USD","duration":600,"durationText":"10 minutes","confidence":0.95,"error":null}
-- "开盘 LINK 1h" → {"asset":"LINK/USD","duration":3600,"durationText":"1 hour","confidence":0.95,"error":null}
+- "BTC 10 minutes" → {"asset":"BTC/USD","duration":600,"durationText":"10 minutes","confidence":0.95,"error":null}
+- "open market LINK 1h" → {"asset":"LINK/USD","duration":3600,"durationText":"1 hour","confidence":0.95,"error":null}
 - "virtual 30m" → {"asset":"VIRTUAL/USD","duration":1800,"durationText":"30 minutes","confidence":0.95,"error":null}
 - "VIRTUAL in tomorrow" → {"asset":"VIRTUAL/USD","duration":86400,"durationText":"tomorrow","confidence":0.95,"error":null}
 - "VIRTUAL in 3.21" → {"asset":"VIRTUAL/USD","duration":172800,"durationText":"3-days","confidence":0.9,"error":null}

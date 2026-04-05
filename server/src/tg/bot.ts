@@ -47,13 +47,13 @@ bot.on(message("text"), async (ctx) => {
   const text = ctx.message.text
   console.log(`[BOT] text event from ${ctx.from?.id} in chat ${ctx.chat?.id}: "${text}"`)
 
-  // 处理斜杠命令（支持群聊中的命令）
+  // Handle slash commands (support commands in group chats)
   if (text.startsWith("/")) {
     const command = text.split(/\s+/)[0].substring(1).split("@")[0]
 
     console.log("command", command)
     
-    // 手动处理命令
+    // Manually handle commands
     switch (command) {
       case "start":
         await handleStart(ctx)
@@ -74,7 +74,7 @@ bot.on(message("text"), async (ctx) => {
         await handleBetCommand(ctx)
         return
       default:
-        // 其他命令由 bot.command() 处理
+        // Other commands are handled by bot.command()
         return
     }
   }
