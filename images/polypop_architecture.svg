@@ -1,0 +1,168 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="980" viewBox="0 0 1800 980" role="img" aria-label="PolyPOP architecture diagram">
+  <defs>
+    <style>
+      text { font-family: Arial, Helvetica, sans-serif; fill: #111827; }
+      .title { font-size: 28px; font-weight: 700; }
+      .subtitle { font-size: 15px; fill: #4b5563; }
+      .group { fill: #f8fafc; stroke: #cbd5e1; stroke-width: 2; rx: 20; ry: 20; }
+      .box { fill: #ffffff; stroke: #475569; stroke-width: 2; rx: 14; ry: 14; }
+      .box-blue { fill: #eff6ff; stroke: #3b82f6; }
+      .box-purple { fill: #f5f3ff; stroke: #8b5cf6; }
+      .box-green { fill: #ecfdf5; stroke: #10b981; }
+      .box-amber { fill: #fffbeb; stroke: #f59e0b; }
+      .box-rose { fill: #fff1f2; stroke: #f43f5e; }
+      .group-title { font-size: 20px; font-weight: 700; }
+      .label { font-size: 16px; font-weight: 600; }
+      .small { font-size: 14px; fill: #374151; }
+      .tiny { font-size: 12px; fill: #6b7280; }
+      .arrow { stroke: #334155; stroke-width: 3; fill: none; marker-end: url(#arrowhead); }
+      .dashed { stroke-dasharray: 9 7; }
+      .note { fill: #fefce8; stroke: #eab308; stroke-width: 1.5; rx: 10; ry: 10; }
+    </style>
+    <marker id="arrowhead" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+      <polygon points="0,0 10,4 0,8" fill="#334155" />
+    </marker>
+  </defs>
+
+  <text x="60" y="52" class="title">PolyPOP Architecture</text>
+  <text x="60" y="80" class="subtitle">Social intent -&gt; Uniswap routing on Ethereum -&gt; Arc market/app-kit -&gt; Chainlink settlement and compliant privacy treasury</text>
+
+  <!-- Groups -->
+  <rect x="40" y="120" width="360" height="720" class="group" />
+  <text x="60" y="155" class="group-title">1. Social + Intent Layer</text>
+
+  <rect x="430" y="120" width="380" height="720" class="group" />
+  <text x="450" y="155" class="group-title">2. Funding + Routing Layer</text>
+
+  <rect x="840" y="120" width="470" height="720" class="group" />
+  <text x="860" y="155" class="group-title">3. Arc Market + Bootstrap Liquidity</text>
+
+  <rect x="1340" y="120" width="420" height="720" class="group" />
+  <text x="1360" y="155" class="group-title">4. Chainlink Settlement + Privacy</text>
+
+  <!-- Layer 1 -->
+  <rect x="70" y="190" width="290" height="82" class="box box-blue" />
+  <text x="90" y="220" class="label">X / Twitter conversation</text>
+  <text x="90" y="245" class="small">User tags @PolyPOP around an event</text>
+
+  <rect x="70" y="305" width="290" height="92" class="box box-blue" />
+  <text x="90" y="335" class="label">PolyPOP AI intent parser</text>
+  <text x="90" y="360" class="small">Extracts market question, side, size,</text>
+  <text x="90" y="381" class="small">time window, and settlement request</text>
+
+  <rect x="70" y="430" width="290" height="92" class="box" />
+  <text x="90" y="460" class="label">Market request builder</text>
+  <text x="90" y="485" class="small">Creates market payload and user order</text>
+  <text x="90" y="506" class="small">for downstream routing</text>
+
+  <rect x="70" y="560" width="290" height="106" class="box" />
+  <text x="90" y="590" class="label">User wallet + signing</text>
+  <text x="90" y="615" class="small">Approvals, signatures, deposit auth,</text>
+  <text x="90" y="636" class="small">and source-chain execution permissions</text>
+
+  <!-- Layer 2 -->
+  <rect x="460" y="190" width="320" height="96" class="box box-purple" />
+  <text x="480" y="220" class="label">Uniswap routing / Trading API</text>
+  <text x="480" y="245" class="small">On Ethereum mainnet route user asset</text>
+  <text x="480" y="266" class="small">into USDC with best path execution</text>
+
+  <rect x="460" y="325" width="320" height="86" class="box box-purple" />
+  <text x="480" y="355" class="label">Source-chain USDC ready</text>
+  <text x="480" y="380" class="small">Funds prepared for market collateral</text>
+
+  <rect x="460" y="450" width="320" height="96" class="box" />
+  <text x="480" y="480" class="label">Crosschain funding rail</text>
+  <text x="480" y="505" class="small">Bridge / Arc liquidity hub / stablecoin</text>
+  <text x="480" y="526" class="small">settlement path into Arc-native balance</text>
+
+  <rect x="460" y="585" width="320" height="106" class="box" />
+  <text x="480" y="615" class="label">Funding state + receipts</text>
+  <text x="480" y="640" class="small">Track deposit status, bridge receipt,</text>
+  <text x="480" y="661" class="small">failure handling, and idempotency</text>
+
+  <!-- Layer 3 -->
+  <rect x="870" y="190" width="410" height="96" class="box box-green" />
+  <text x="890" y="220" class="label">Arc App-Kit</text>
+  <text x="890" y="245" class="small">Market creation, liquidity provision,</text>
+  <text x="890" y="266" class="small">crosschain support, and settlement hooks</text>
+
+  <rect x="870" y="325" width="410" height="106" class="box box-green" />
+  <text x="890" y="355" class="label">Arc market state</text>
+  <text x="890" y="380" class="small">Question, positions, collateral, odds,</text>
+  <text x="890" y="401" class="small">betting window, and claimable balances</text>
+
+  <rect x="870" y="470" width="410" height="110" class="box box-amber" />
+  <text x="890" y="500" class="label">Bootstrap liquidity / cold-start logic</text>
+  <text x="890" y="525" class="small">Protocol side temporarily acts as counterparty</text>
+  <text x="890" y="546" class="small">until real flow arrives from users or LPs</text>
+
+  <rect x="870" y="620" width="195" height="96" class="box box-amber" />
+  <text x="890" y="650" class="label">Real counterparty</text>
+  <text x="890" y="675" class="small">User / LP enters before close</text>
+
+  <rect x="1085" y="620" width="195" height="96" class="box box-amber" />
+  <text x="1105" y="650" class="label">Protocol treasury</text>
+  <text x="1105" y="675" class="small">Retains exposure if no match arrives</text>
+
+  <!-- Layer 4 -->
+  <rect x="1370" y="190" width="360" height="92" class="box box-rose" />
+  <text x="1390" y="220" class="label">Chainlink CRE workflow</text>
+  <text x="1390" y="245" class="small">Onchain state-changing settlement flow</text>
+  <text x="1390" y="266" class="small">verifies outcome and triggers settlement</text>
+
+  <rect x="1370" y="315" width="360" height="92" class="box box-rose" />
+  <text x="1390" y="345" class="label">Outcome source + finalization</text>
+  <text x="1390" y="370" class="small">Oracle / API / attestation + close rule</text>
+
+  <rect x="1370" y="440" width="360" height="96" class="box box-rose" />
+  <text x="1390" y="470" class="label">ACE Engine policy check</text>
+  <text x="1390" y="495" class="small">Policy engine evaluates compliant private</text>
+  <text x="1390" y="516" class="small">token transfer requirements</text>
+
+  <rect x="1370" y="570" width="360" height="96" class="box box-rose" />
+  <text x="1390" y="600" class="label">Public claim / private treasury lane</text>
+  <text x="1390" y="625" class="small">Small payouts public, sensitive flows routed</text>
+  <text x="1390" y="646" class="small">to compliant private transfer + treasury</text>
+
+  <rect x="1370" y="700" width="360" height="96" class="box" />
+  <text x="1390" y="730" class="label">Settlement receipts + accounting</text>
+  <text x="1390" y="755" class="small">Claims, treasury balances, audit trail,</text>
+  <text x="1390" y="776" class="small">and revenue reconciliation</text>
+
+  <!-- Arrows -->
+  <path d="M215 272 L215 305" class="arrow" />
+  <path d="M215 397 L215 430" class="arrow" />
+  <path d="M215 522 L215 560" class="arrow" />
+
+  <path d="M360 351 L460 238" class="arrow" />
+  <path d="M360 476 L460 498" class="arrow" />
+  <path d="M360 613 L460 638" class="arrow" />
+
+  <path d="M620 286 L620 325" class="arrow" />
+  <path d="M620 411 L620 450" class="arrow" />
+  <path d="M620 546 L620 585" class="arrow" />
+
+  <path d="M780 238 L870 238" class="arrow" />
+  <path d="M780 498 L870 373" class="arrow" />
+  <path d="M780 638 L870 373" class="arrow dashed" />
+
+  <path d="M1075 286 L1075 325" class="arrow" />
+  <path d="M1075 431 L1075 470" class="arrow" />
+  <path d="M975 580 L975 620" class="arrow" />
+  <path d="M1185 580 L1185 620" class="arrow" />
+
+  <path d="M1280 373 L1370 236" class="arrow" />
+  <path d="M1280 373 L1370 361" class="arrow dashed" />
+  <path d="M1550 282 L1550 315" class="arrow" />
+  <path d="M1550 407 L1550 440" class="arrow" />
+  <path d="M1550 536 L1550 570" class="arrow" />
+  <path d="M1550 666 L1550 700" class="arrow" />
+
+  <path d="M1075 431 L1370 748" class="arrow dashed" />
+  <path d="M1185 716 L1370 618" class="arrow dashed" />
+
+  <!-- Top linear summary -->
+  <rect x="110" y="880" width="1580" height="52" class="note" />
+  <text x="135" y="912" class="label">X Conversation → @PolyPOP → Uniswap Routing → Arc App-Kit → Arc Market → Chainlink Settlement → Privacy Treasury</text>
+
+</svg>

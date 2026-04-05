@@ -3,6 +3,76 @@
 PolyPOP turns live disagreement into live markets.
 When users are already arguing on X, debating with friends, or seeing two clear sides to a question, they can tag @PolyPOP to deploy an onchain prediction market directly from the conversation.
 
+## Dependencies
+
+- Arc: liquidity hub / advanced stablecoin logic / crosschain settlement / app-kit
+- Uniswap: API routing + bootstrap liquidity demo on Base 
+- Chainlink: onchain state-changing settlement flow, ACE Engine, Compliant private token transfer
+
+
+## Design
+![Design](./images/polypop_architecture.svg)
+
+
+## Architecture Overview
+
+```
+X Conversation → @PolyPOP → Uniswap Routing → Arc App-Kit → Arc Market → Chainlink Settlement → Privacy Treasury
+```
+
+## Arc App-Kit Integration
+
+The Arc App-Kit provides the following features:
+- Market creation and management
+- Liquidity provision
+- Settlement logic
+- Cross-chain support
+
+
+## Uniswap Integration
+
+- Uniswap provides API routing and trading API on eth mainnet
+
+## Chainlink Integration
+
+- Chainlink cre workflow
+- ACE Engine.
+- Compliant private token transfer.
+
+## Main Files
+
+### Arc App-Kit (Prediction Market / Settlement / Cross-chain)
+- `contracts/src/BinaryPredictionMarket.sol` — core prediction market contract
+- `contracts/src/BinaryPredictionMarketFactory.sol` — market factory contract
+- `contracts/src/interfaces/IBinaryPredictionMarket.sol` — market interface
+- `contracts/src/interfaces/ReceiverTemplate.sol` — cross-chain receiver template
+- `contracts/src/interfaces/IReceiver.sol` — cross-chain receiver interface
+- `server/src/common/services/settlement.ts` — settlement logic
+- `server/src/common/services/claim.ts` — claim logic
+- `server/src/common/services/bet-listener.ts` — bet event listener
+- `server/src/common/services/market-data.ts` — market data service
+- `webapp/src/lib/bridge.ts` — cross-chain bridge calls
+- `webapp/src/pages/CreatePredictionPage.tsx` / `HackathonCreatePage.tsx` — market creation pages
+- `webapp/src/pages/MarketPage.tsx` / `HackathonMarketPage.tsx` — market pages
+- `webapp/src/pages/BetPage.tsx` — betting page
+
+### Uniswap (Swap / Trade Routing)
+- `webapp/src/lib/uniswap.ts` — Uniswap integration utilities
+- `webapp/src/lib/uniswapApi.ts` — Uniswap API routing wrapper
+- `webapp/src/pages/SwapPage.tsx` — swap page
+
+### Chainlink (CRE Workflow / ACE Engine / Compliant Private Transfer)
+- `cre-workflow/binary-weather/main.ts` — CRE workflow main logic
+- `cre-workflow/binary-weather/workflow.yaml` — CRE workflow config
+- `cre-workflow/project.yaml` — CRE project config
+- `server/src/ace-worker.ts` — ACE Engine worker
+- `server/src/common/aceApi.ts` — ACE API (server-side)
+- `webapp/src/lib/aceApi.ts` — ACE API (client-side)
+- `webapp/src/pages/AceClaimPage.tsx` — ACE compliant transfer claim page
+- `server/src/common/services/oracle-listener.ts` — Chainlink oracle listener
+- `contracts/src/interfaces/AggregatorV3Interface.sol` — Chainlink data feed interface
+- `contracts/src/interfaces/AutomationCompatibleInterface.sol` — Chainlink Automation interface
+
 
 ## One-Line Pitch
 
