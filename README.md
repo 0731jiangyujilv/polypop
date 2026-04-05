@@ -86,20 +86,6 @@ The Arc App-Kit provides the following features:
 
   
 
-Arc：liquidity hub / advanced stablecoin logic / crosschain settlement 
-
-Uniswap：API routing + bootstrap liquidity demo on Base 
-
-Chainlink：onchain state-changing settlement flow 
-
-Privacy(Chainlink Privacy Standard): 
-1. Winners can opt into private settlement;
-2. Protocol fees can be swept into a private treasury lane
-
-
-
----
-
 ## The Problem
 
 Predictions already happen in conversations.
@@ -236,19 +222,6 @@ PolyPOP uses Chainlink for:
 
 ---
 
-## Key Features
-
-- social-native market creation from X
-- Arc-native USDC market settlement
-- Base ETH user entry without pre-holding USDC
-- automatic ETH → USDC conversion through Uniswap
-- Base → Arc USDC bridge flow
-- Chainlink-powered resolution
-- optional privacy lane for large winner payouts
-- optional privacy lane for protocol treasury flows
-
----
-
 ## Technical Stack
 
 ### Frontend
@@ -274,101 +247,6 @@ PolyPOP uses Chainlink for:
 ### Oracle / Workflow / Privacy
 - Chainlink CRE
 - Chainlink Confidential Compute / Confidential HTTP
-
----
-
-# PolyPOP
-
-**Turn live disagreement into live markets.**
-
-PolyPOP lets users turn an active disagreement on X into an onchain prediction market.  
-When users are already arguing, debating with friends, or seeing a question with two clear sides, they can tag **@_PolyPOP** on X to trigger a market creation flow.
-
-The market is created natively on **Arc** and settles in **USDC**.
-
----
-
-
-
----
-
-## Overview
-
-PolyPOP starts when disagreement already exists.
-
-It could be:
-- two users actively arguing on X
-- friends debating an outcome
-- a live conversation with two clear opposing sides
-- a claim that naturally wants a market
-
-Instead of moving to a separate dashboard and manually creating a market, users simply tag **@_PolyPOP** inside the conversation. PolyPOP then turns that live disagreement into an onchain prediction market.
-
-The market itself is created natively on **Arc** and settles in **USDC**.
-
-If a user only has **ETH on Base** and no **USDC on Arc**, PolyPOP first uses **Uniswap** to swap **ETH into USDC on Base**. After that, PolyPOP uses **Bridge Kit + CCTP** to move the USDC from **Base to Arc**, where the user can join the Arc-native market.
-
-Market resolution is handled by **Chainlink**, and large winner payouts or large protocol revenue can optionally move into a **privacy-preserving settlement lane**.
-
----
-
-## One-Line Pitch
-
-**PolyPOP is a social-native prediction market where live disagreement on X becomes an Arc-native USDC market, Uniswap powers Base-side asset conversion, Bridge Kit + CCTP moves funds into Arc, and Chainlink powers resolution plus privacy-preserving large-value settlement flows.**
-
----
-
-## How It Works
-
-### 1. A disagreement already exists
-PolyPOP does not start from a dashboard.  
-It starts when users are already in a disagreement.
-
-### 2. Users tag @_PolyPOP on X
-A user tags **@_PolyPOP** in the conversation.  
-That interaction becomes the trigger for market creation.
-
-### 3. The market is created on Arc
-The prediction market is deployed natively on **Arc** and settles in **USDC**.
-
-### 4. The user may only have ETH on Base
-The user does not need to already hold USDC on Arc.
-
-### 5. Uniswap swaps ETH into USDC on Base
-If the user only has ETH on Base, PolyPOP uses **Uniswap** to swap **ETH → USDC on Base**.
-
-### 6. Bridge Kit + CCTP moves USDC from Base to Arc
-After the Base-side swap is completed, PolyPOP uses **Bridge Kit + CCTP** to move **USDC from Base into Arc**.
-
-### 7. The user joins the Arc-native market
-The user enters the market on Arc, and the betting flow is settled in USDC.
-
-### 8. Chainlink resolves the market
-Chainlink handles the result verification and resolution workflow.
-
-### 9. Large-value flows can go private
-If a winner payout is large, or if protocol revenue becomes large, the value flow can move into a **privacy-preserving settlement lane** rather than exposing everything publicly.
-
----
-
-## Why PolyPOP Exists
-
-Prediction demand already exists socially.
-
-People constantly argue about:
-- whether ETH goes up or down
-- whether a headline is bullish or bearish
-- whether an event will happen by a deadline
-- which side of a claim is right
-
-But most of those disagreements never become real markets because:
-- market creation is too heavy
-- users do not hold the right stablecoin
-- users may not be on the right chain
-- there may be no counterparty at the start
-- large payouts can expose too much onchain information
-
-PolyPOP reduces all of that friction.
 
 ---
 
