@@ -1,0 +1,12 @@
+{
+  "schedule": "*/5 * * * *",
+  "cmeApiUrl": "https://www.cmegroup.com/CmeWS/mvc/quotes/v2/contracts-by-number",
+  "evms": [
+    {
+      "marketFactoryAddress": "0xf2bD5CC1b11526CDF721006Dc25049C430EC6d56",
+      "chainSelectorName": "arc-mainnet",
+      "isTestnet": false,
+      "gasLimit": "500000"
+    }
+  ]
+}

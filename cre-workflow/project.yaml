@@ -1,0 +1,17 @@
+staging-settings:
+  rpcs:
+    - chain-name: ethereum-testnet-sepolia-base-1
+      url: https://sepolia.base.org
+    - chain-name: ethereum-testnet-sepolia
+      url: https://ethereum-sepolia-rpc.publicnode.com
+    - chain-name: arc-testnet
+      url: https://rpc.testnet.arc.network
+    - chain-name: ethereum-mainnet
+      url: https://ethereum-rpc.publicnode.com
+
+production-settings:
+  rpcs:
+    - chain-name: base-mainnet
+      url: https://mainnet.base.org
+    - chain-name: arc-mainnet
+      url: https://rpc.arc.network

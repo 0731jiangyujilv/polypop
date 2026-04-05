@@ -1,0 +1,18 @@
+{
+  "name": "binary-weather-market",
+  "version": "1.0.0",
+  "description": "Chainlink CRE workflow for Arc binary weather markets",
+  "main": "main.ts",
+  "scripts": {
+    "simulate": "cre workflow simulate binary-weather",
+    "simulate:broadcast": "cre workflow simulate binary-weather --broadcast"
+  },
+  "dependencies": {
+    "@chainlink/cre-sdk": "latest",
+    "viem": "^2.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  }
+}
