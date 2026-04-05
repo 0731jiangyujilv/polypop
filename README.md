@@ -86,7 +86,6 @@ The Arc App-Kit provides the following features:
 
 
 
-
 ## The Problem
 
 Predictions already happen in conversations.
@@ -194,34 +193,7 @@ It is a **stablecoin-native market workflow** that solves three real frictions a
 
 ---
 
-## Sponsor Mapping
 
-### Arc
-Arc is the native market and settlement layer.
-
-PolyPOP uses Arc for:
-- market creation
-- USDC collateral
-- onchain settlement
-- programmable stablecoin logic
-
-### Uniswap
-Uniswap is the asset entry and execution layer.
-
-PolyPOP uses Uniswap for:
-- ETH → USDC conversion
-- clean user entry into a stablecoin-settled market
-- execution and routing at the point of market entry
-
-### Chainlink
-Chainlink is the resolution and privacy layer.
-
-PolyPOP uses Chainlink for:
-- market resolution through CRE
-- workflow orchestration
-- privacy-preserving payout and treasury flows
-
----
 
 ## Technical Stack
 
