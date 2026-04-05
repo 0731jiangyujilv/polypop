@@ -1,7 +1,7 @@
 # PolyPOP
 
-PolyPOP turns live disagreement into live markets.
-When users are already arguing on X, debating with friends, or seeing two clear sides to a question, they can tag @_PolyPOP to deploy an onchain prediction market directly from the conversation.
+PolyPOP turns live disagreement into prediction markets on X.
+When users are already arguing, debating with friends, or seeing two clear sides to a question, they can tag @_PolyPOP to deploy an onchain prediction market directly from the conversation.
 
 ## Links
 
